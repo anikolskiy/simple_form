@@ -3,7 +3,7 @@ module SimpleForm
     class LocalizedInput < Base
       enable :placeholder, :maxlength, :pattern
 
-      LANGUAGES = [:de, :en]
+      LANGUAGES = [:de, :en, :ru]
 
       def label
         result = if generate_label_for_attribute?
@@ -12,7 +12,7 @@ module SimpleForm
                    template.label_tag(nil, label_text, label_html_options)
                  end
 
-        switchers = LANGUAGES.map do |lang|
+        switchers = effective_languages.map do |lang|
           classes = ["LanguageSelector-link is-#{lang}"]
           classes << 'is-selected' if lang == LANGUAGES.first
 
@@ -31,7 +31,7 @@ module SimpleForm
 
         orig_classes = [input_html_options[:class], 'js-localized'].flatten
 
-        LANGUAGES.map do |lang|
+        effective_languages.map do |lang|
           classes = orig_classes.dup
           classes << 'hidden' unless lang == LANGUAGES.first
           classes << "lang_#{lang}"
@@ -42,8 +42,20 @@ module SimpleForm
 
       private
 
+      def effective_languages
+        LANGUAGES.select { |lang| lang == :de or has_attribute?("#{attribute_name}_#{lang}") }
+      end
+
       def string?
         input_type == :string
+      end
+
+      def old_attr_naming(lang)
+        lang.to_s == 'de' and !has_attribute?("#{attribute_name}_#{lang}") and has_attribute?(attribute_name)
+      end
+
+      def has_attribute?(attr)
+        @builder.object.attributes.keys.include?(attr.to_s)
       end
     end
   end
