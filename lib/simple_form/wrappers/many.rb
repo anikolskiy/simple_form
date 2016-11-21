@@ -24,6 +24,8 @@ module SimpleForm
         content = "".html_safe
         options = input.options
 
+        content.safe_concat input.language_switchers if input.respond_to? :language_switchers
+
         components.each do |component|
           next if options[component] == false
           rendered = component.respond_to?(:render) ? component.render(input) : input.send(component)

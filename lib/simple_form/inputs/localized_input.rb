@@ -6,12 +6,14 @@ module SimpleForm
       LANGUAGES = [:de, :en, :ru]
 
       def label
-        result = if generate_label_for_attribute?
-                   @builder.label(label_target, label_text, label_html_options)
-                 else
-                   template.label_tag(nil, label_text, label_html_options)
-                 end
+        if generate_label_for_attribute?
+          @builder.label(label_target, label_text, label_html_options)
+        else
+          template.label_tag(nil, label_text, label_html_options)
+        end
+      end
 
+      def language_switchers
         switchers = effective_languages.map do |lang|
           classes = ["LanguageSelector-link is-#{lang}"]
           classes << 'is-selected' if lang == LANGUAGES.first
@@ -19,10 +21,7 @@ module SimpleForm
           @builder.content_tag(:a, nil, :class => classes.join(' '), :href => '#', :data => { :lang => lang })
         end
 
-        [
-            result,
-            @builder.content_tag(:div, switchers.join.html_safe, :class => 'LanguageSwitchers')
-        ].join.html_safe
+        @builder.content_tag(:div, switchers.join.html_safe, :class => 'LanguageSwitchers')
       end
 
       def input
