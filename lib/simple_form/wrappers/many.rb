@@ -24,7 +24,7 @@ module SimpleForm
         content = "".html_safe
         options = input.options
 
-        content.safe_concat input.language_switchers if input.respond_to? :language_switchers
+        content.safe_concat input.language_switchers if is_a?(SimpleForm::Wrappers::Root) and input.respond_to?(:language_switchers)
 
         components.each do |component|
           next if options[component] == false
