@@ -5,6 +5,14 @@ module SimpleForm
 
       LANGUAGES = [:de, :en, :ru]
 
+      def self.supported_languages=(languages)
+        @@languages = languages.map(&:to_sym)
+      end
+
+      def self.supported_languages
+        defined?(@@languages) ? @@languages : LANGUAGES
+      end
+
       def label
         if generate_label_for_attribute?
           @builder.label(label_target, label_text, label_html_options)
@@ -16,7 +24,7 @@ module SimpleForm
       def language_switchers
         switchers = effective_languages.map do |lang|
           classes = ["LanguageSelector-link is-#{lang}"]
-          classes << 'is-selected' if lang == LANGUAGES.first
+          classes << 'is-selected' if lang == supported_languages.first
 
           @builder.content_tag(:a, nil, :class => classes.join(' '), :href => '#', :data => { :lang => lang })
         end
@@ -32,7 +40,7 @@ module SimpleForm
 
         effective_languages.map do |lang|
           classes = orig_classes.dup
-          classes << 'hidden' unless lang == LANGUAGES.first
+          classes << 'hidden' unless lang == supported_languages.first
           classes << "lang_#{lang}"
 
           generate_input lang, classes.join(' ')
@@ -41,8 +49,12 @@ module SimpleForm
 
       private
 
+      def supported_languages
+        SimpleForm::Inputs::LocalizedInput.supported_languages
+      end
+
       def effective_languages
-        LANGUAGES.select { |lang| lang == :de or has_attribute?("#{attribute_name}_#{lang}") }
+        supported_languages.select { |lang| lang == :de or has_attribute?("#{attribute_name}_#{lang}") }
       end
 
       def string?
